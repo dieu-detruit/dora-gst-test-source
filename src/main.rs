@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let source_fps = std::env::var("SOURCE_FPS")
         .unwrap_or_else(|_| "30".to_string())
         .parse::<u32>()?;
-    let source_format = std::env::var("SOURCE_FORMAT").unwrap_or_else(|_| "RGB".to_string());
+    let source_format = std::env::var("SOURCE_FORMAT").unwrap_or_else(|_| "RGB8".to_string());
 
     // parameters for videotestsrc properties with default values
     let animation_mode = std::env::var("ANIMATION_MODE").unwrap_or_else(|_| "0".to_string()); // 0=frames, 1=wall-time, 2=running-time
