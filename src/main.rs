@@ -1,6 +1,34 @@
 use dora_node_api::{self, DoraNode, Event, Parameter, dora_core::config::DataId};
 use kornia_io::stream::StreamCapture;
 
+fn _get_fraction(fps: f64) -> (u32, u32) {
+    if fps.fract() == 0.0 {
+        return (fps as u32, 1);
+    }
+
+    // commonly used FPS fractions
+    let common_fps = [
+        (23.976, (24000, 1001)),
+        (29.97, (30000, 1001)),
+        (59.94, (60000, 1001)),
+        (119.88, (120000, 1001)),
+    ];
+    for &(val, frac) in &common_fps {
+        if (fps - val).abs() < 0.001 {
+            return frac;
+        }
+    }
+
+    let mut fps_f = fps;
+    let mut denominator = 1;
+    while fps_f.fract() != 0.0 {
+        fps_f *= 10.0;
+        denominator *= 10;
+    }
+
+    (fps_f as u32, denominator)
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // parameters for image size with default values
     let image_cols = std::env::var("IMAGE_COLS")
@@ -41,10 +69,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Flip: {}", flip);
     println!("  Is live: {}", is_live);
 
+    let (fps_numerator, fps_denominator) = _get_fraction(source_fps as f64);
+
     // create the videotestsrc pipeline
     let pipeline_desc = format!(
         "videotestsrc pattern={} animation-mode={} motion={} background-color={} foreground-color={} flip={} is-live={} ! \
-         video/x-raw,width={},height={},framerate={}/1 ! \
+         video/x-raw,width={},height={},framerate={}/{} ! \
          videoconvert ! \
          video/x-raw,format=RGB ! \
          appsink name=sink",
@@ -57,7 +87,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         is_live,
         image_cols,
         image_rows,
-        source_fps,
+        fps_numerator,
+        fps_denominator,
     );
 
     println!("Using GStreamer pipeline: {}", pipeline_desc);
