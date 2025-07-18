@@ -12,7 +12,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let source_fps = std::env::var("SOURCE_FPS")
         .unwrap_or_else(|_| "30".to_string())
         .parse::<u32>()?;
-    let source_format = std::env::var("SOURCE_FORMAT").unwrap_or_else(|_| "RGB8".to_string());
 
     // parameters for videotestsrc properties with default values
     let animation_mode = std::env::var("ANIMATION_MODE").unwrap_or_else(|_| "0".to_string()); // 0=frames, 1=wall-time, 2=running-time
@@ -28,7 +27,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Configuration:");
     println!("  Size: {}x{}", image_cols, image_rows);
     println!("  FPS: {}", source_fps);
-    println!("  Format: {}", source_format);
     println!(
         "  Pattern: {} (0=smpte, 1=snow, 2=black, 3=white, 4=red, 5=green, 6=blue)",
         pattern
@@ -48,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "videotestsrc pattern={} animation-mode={} motion={} background-color={} foreground-color={} flip={} is-live={} ! \
          video/x-raw,width={},height={},framerate={}/1 ! \
          videoconvert ! \
-         video/x-raw,format={} ! \
+         video/x-raw,format=RGB ! \
          appsink name=sink",
         pattern,
         animation_mode,
@@ -60,7 +58,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         image_cols,
         image_rows,
         source_fps,
-        source_format
     );
 
     println!("Using GStreamer pipeline: {}", pipeline_desc);
@@ -87,10 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     };
 
                     let mut params = metadata.parameters;
-                    params.insert(
-                        "encoding".to_owned(),
-                        Parameter::String(source_format.clone()),
-                    );
+                    params.insert("encoding".to_owned(), Parameter::String("RGB8".to_string()));
                     params.insert(
                         "height".to_owned(),
                         Parameter::Integer(frame.size().height as i64),
