@@ -1,0 +1,8 @@
+[package]
+name = "dora-gst-dummy-source"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dora-node-api = "0.3.12"
+kornia-io = { version = "0.1.9", features = ["gstreamer"] }
