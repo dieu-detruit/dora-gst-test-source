@@ -1,72 +1,72 @@
 # dora-gst-test-source
 
-videotestsrcを使用してダミー映像を生成するdora-rsノードです。GStreamerのvideotestsrc要素を使い、様々なテストパターンの映像を生成できます。
+A dora-rs node that generates dummy video using videotestsrc. It uses GStreamer's videotestsrc element to generate various test pattern videos.
 
-## 機能
+## Features
 
-- GStreamerのvideotestsrcを使用した動的なテスト映像の生成
-- 様々なパターン（SMPTE、ノイズ、単色など）の生成
-- サイズ、フレームレート、色などの詳細な設定
-- kornia-ioを使用した効率的な映像処理
-- dora-rsとの統合によるリアルタイム映像配信
+- Dynamic test video generation using GStreamer's videotestsrc
+- Generation of various patterns (SMPTE, noise, solid colors, etc.)
+- Detailed configuration of size, frame rate, colors, etc.
+- Efficient video processing using kornia-io
+- Real-time video streaming through integration with dora-rs
 
-## 環境変数とデフォルト値
+## Environment Variables and Default Values
 
-すべての環境変数にはデフォルト値が設定されているため、設定せずに実行可能です。
+All environment variables have default values, so you can run without configuration.
 
-### 映像設定
+### Video Settings
 
-| 環境変数 | デフォルト値 | 説明 |
+| Environment Variable | Default Value | Description |
 |---------|-------------|------|
-| `IMAGE_COLS` | `640` | 映像の幅（ピクセル） |
-| `IMAGE_ROWS` | `480` | 映像の高さ（ピクセル） |
-| `SOURCE_FPS` | `30` | フレームレート |
-| `SOURCE_FORMAT` | `RGB` | 出力フォーマット（RGB, BGR, GRAY8など） |
+| `IMAGE_COLS` | `640` | Video width (pixels) |
+| `IMAGE_ROWS` | `480` | Video height (pixels) |
+| `SOURCE_FPS` | `30` | Frame rate |
+| `SOURCE_FORMAT` | `RGB` | Output format (RGB, BGR, GRAY8, etc.) |
 
-### videotestsrcプロパティ
+### videotestsrc Properties
 
-| 環境変数 | デフォルト値 | 説明 |
+| Environment Variable | Default Value | Description |
 |---------|-------------|------|
-| `PATTERN` | `0` | テストパターン（0=smpte, 1=snow, 2=black, 3=white, 4=red, 5=green, 6=blue） |
-| `ANIMATION_MODE` | `0` | アニメーションモード（0=frames, 1=wall-time, 2=running-time） |
-| `MOTION` | `0` | モーション設定 |
-| `BACKGROUND_COLOR` | `0xff000000` | 背景色（ARGB形式） |
-| `FOREGROUND_COLOR` | `0xffffffff` | 前景色（ARGB形式） |
-| `FLIP` | `false` | 映像の反転 |
-| `IS_LIVE` | `true` | ライブストリーミングモード |
+| `PATTERN` | `0` | Test pattern (0=smpte, 1=snow, 2=black, 3=white, 4=red, 5=green, 6=blue) |
+| `ANIMATION_MODE` | `0` | Animation mode (0=frames, 1=wall-time, 2=running-time) |
+| `MOTION` | `0` | Motion settings |
+| `BACKGROUND_COLOR` | `0xff000000` | Background color (ARGB format) |
+| `FOREGROUND_COLOR` | `0xffffffff` | Foreground color (ARGB format) |
+| `FLIP` | `false` | Video flip |
+| `IS_LIVE` | `true` | Live streaming mode |
 
-## 使用例
+## Usage Examples
 
-### デフォルト設定で実行
+### Run with Default Settings
 ```bash
 cargo run
 ```
 
-### カスタム設定で実行
+### Run with Custom Settings
 ```bash
-# HD解像度、60FPS、雪ノイズパターン
+# HD resolution, 60FPS, snow noise pattern
 IMAGE_COLS=1920 IMAGE_ROWS=1080 SOURCE_FPS=60 PATTERN=1 cargo run
 
-# 単色（赤）パターン
+# Solid color (red) pattern
 PATTERN=4 cargo run
 
-# BGRフォーマットで出力
+# Output in BGR format
 SOURCE_FORMAT=BGR cargo run
 ```
 
-## ビルド
+## Build
 
 ```bash
 cargo build --release
 ```
 
-## 依存関係
+## Dependencies
 
-- `dora-node-api`: dora-rsとの統合
-- `kornia-io`: GStreamer統合と映像処理
-- GStreamer: システムにインストールされている必要があります
+- `dora-node-api`: Integration with dora-rs
+- `kornia-io`: GStreamer integration and video processing
+- GStreamer: Must be installed on the system
 
-### GStreamerのインストール
+### Installing GStreamer
 
 #### Ubuntu/Debian
 ```bash
@@ -78,36 +78,36 @@ sudo apt install gstreamer1.0-tools gstreamer1.0-plugins-base gstreamer1.0-plugi
 brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad
 ```
 
-## テストパターンの種類
+## Test Pattern Types
 
-- `0`: SMPTE色バーテスト
-- `1`: ランダムノイズ（雪）
-- `2`: 黒画面
-- `3`: 白画面  
-- `4`: 赤画面
-- `5`: 緑画面
-- `6`: 青画面
-- `7`: チェッカーボード
-- `8`: 水平グラデーション
-- その他多数のパターンが利用可能
+- `0`: SMPTE color bar test
+- `1`: Random noise (snow)
+- `2`: Black screen
+- `3`: White screen  
+- `4`: Red screen
+- `5`: Green screen
+- `6`: Blue screen
+- `7`: Checkerboard
+- `8`: Horizontal gradient
+- Many other patterns available
 
-## 出力
+## Output
 
-ノードは`frame`という名前で映像フレームを出力します。各フレームには以下のメタデータが付与されます：
+The node outputs video frames with the name `frame`. Each frame includes the following metadata:
 
-- `encoding`: フォーマット（RGB、BGRなど）
-- `width`: 映像の幅
-- `height`: 映像の高さ
+- `encoding`: Format (RGB, BGR, etc.)
+- `width`: Video width
+- `height`: Video height
 
-## トラブルシューティング
+## Troubleshooting
 
-### GStreamerエラー
-- GStreamerが正しくインストールされているか確認
-- 必要なプラグインがインストールされているか確認
+### GStreamer Errors
+- Check that GStreamer is properly installed
+- Verify that required plugins are installed
 
-### フォーマットエラー
-- `SOURCE_FORMAT`が正しい値（RGB、BGR、GRAY8など）に設定されているか確認
+### Format Errors
+- Check that `SOURCE_FORMAT` is set to a valid value (RGB, BGR, GRAY8, etc.)
 
-### パフォーマンス問題
-- フレームレートやサイズを下げて試行
-- システムのリソース使用量を確認 
+### Performance Issues
+- Try reducing frame rate or size
+- Check system resource usage 
