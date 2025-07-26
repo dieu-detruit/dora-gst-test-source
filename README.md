@@ -35,6 +35,8 @@ All environment variables have default values, so you can run without configurat
 | `FLIP` | `false` | Video flip |
 | `IS_LIVE` | `true` | Live streaming mode |
 
+For detailed information about all available properties and patterns, see the [GStreamer videotestsrc documentation](https://gstreamer.freedesktop.org/documentation/videotestsrc/?gi-language=c).
+
 ## Usage Examples
 
 ### Run with Default Settings
