@@ -51,6 +51,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let is_live = std::env::var("IS_LIVE").unwrap_or_else(|_| "true".to_string());
     let motion = std::env::var("MOTION").unwrap_or_else(|_| "0".to_string());
     let pattern = std::env::var("PATTERN").unwrap_or_else(|_| "0".to_string()); // 0=smpte, 1=snow, 2=black, etc.
+    let overlay_timestamp = std::env::var("OVERLAY_TIMESTAMP")
+        .map(|val| val == "true" || val == "1")
+        .unwrap_or(false);
 
     println!("Configuration:");
     println!("  Size: {}x{}", image_cols, image_rows);
@@ -68,28 +71,51 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Foreground color: {}", foreground_color);
     println!("  Flip: {}", flip);
     println!("  Is live: {}", is_live);
+    println!("  Overlay timestamp: {}", overlay_timestamp);
 
     let (fps_numerator, fps_denominator) = _get_fraction(source_fps as f64);
 
     // create the videotestsrc pipeline
-    let pipeline_desc = format!(
-        "videotestsrc pattern={} animation-mode={} motion={} background-color={} foreground-color={} flip={} is-live={} ! \
-         video/x-raw,width={},height={},framerate={}/{} ! \
-         videoconvert ! \
-         video/x-raw,format=RGB ! \
-         appsink name=sink",
-        pattern,
-        animation_mode,
-        motion,
-        background_color,
-        foreground_color,
-        flip,
-        is_live,
-        image_cols,
-        image_rows,
-        fps_numerator,
-        fps_denominator,
-    );
+    let pipeline_desc = if overlay_timestamp {
+        format!(
+            "videotestsrc pattern={} animation-mode={} motion={} background-color={} foreground-color={} flip={} is-live={} ! \
+             video/x-raw,width={},height={},framerate={}/{} ! \
+             timeoverlay ! \
+             videoconvert ! \
+             video/x-raw,format=RGB ! \
+             appsink name=sink",
+            pattern,
+            animation_mode,
+            motion,
+            background_color,
+            foreground_color,
+            flip,
+            is_live,
+            image_cols,
+            image_rows,
+            fps_numerator,
+            fps_denominator,
+        )
+    } else {
+        format!(
+            "videotestsrc pattern={} animation-mode={} motion={} background-color={} foreground-color={} flip={} is-live={} ! \
+             video/x-raw,width={},height={},framerate={}/{} ! \
+             videoconvert ! \
+             video/x-raw,format=RGB ! \
+             appsink name=sink",
+            pattern,
+            animation_mode,
+            motion,
+            background_color,
+            foreground_color,
+            flip,
+            is_live,
+            image_cols,
+            image_rows,
+            fps_numerator,
+            fps_denominator,
+        )
+    };
 
     println!("Using GStreamer pipeline: {}", pipeline_desc);
 
